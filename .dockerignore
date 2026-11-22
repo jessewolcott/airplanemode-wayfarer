@@ -1,0 +1,12 @@
+.git
+.github
+.vscode
+.venv
+.cache
+.scratch
+tests
+**/__pycache__
+*.md
+compose.yaml
+docs
+bank/*.py

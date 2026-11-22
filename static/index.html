@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1424">
+<title>Wayfarer · AirplaneMode</title>
+<link rel="icon" href="static/icon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --bg: #0b1424; --bg2: #0f1b30; --card: #13223b; --card2: #182a47; --line: #24385a; --ink: #f3eedf; --dim: #a6b0c3;
+    --gold: #f2b84b; --gold-ink: #2a1c02; --teal: #3cc4b4; --good: #3fb6e8; --good-ink: #04212e;
+    --bad: #f08a3c; --bad-ink: #2b1203; --stamp: #e46a5a; --paper: #f6efdc; --paper-ink: #2a2a33;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --round: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    --col: min(100vw, 560px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font: 16px/1.45 var(--sans); }
+  body {
+    background:
+      radial-gradient(1200px 600px at 50% -200px, #1c3460 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent 0 39px, #ffffff06 39px 40px),
+      repeating-linear-gradient(90deg, transparent 0 39px, #ffffff06 39px 40px),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  a { color: var(--gold); }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .wrap { width: var(--col); margin: 0 auto; padding: max(10px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom)); }
+
+  /* ---------- top bar ---------- */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+  .brand svg { width: 34px; height: 34px; flex: none; }
+  .brand b { font: 800 1.35rem/1 var(--round); letter-spacing: .02em; }
+  .brand small { display: block; font: 600 .62rem/1.2 var(--mono); color: var(--dim); letter-spacing: .14em; text-transform: uppercase; margin-top: 3px; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #ffffff0d; border: 1px solid var(--line); }
+  .icon-btn svg { width: 22px; height: 22px; }
+
+  /* ---------- home ---------- */
+  h2 { font: 700 .74rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); margin: 26px 2px 10px; display: flex; align-items: center; gap: 8px; }
+  h2::after { content: ""; flex: 1; border-top: 1px dashed var(--line); }
+  .pass {
+    position: relative; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; width: 100%; text-align: left;
+    padding: 16px 18px 16px 20px; margin-bottom: 12px; border-radius: 16px; background: linear-gradient(135deg, var(--card2), var(--card));
+    border: 1px solid var(--line); box-shadow: 0 6px 18px #0005; min-height: 84px; transition: transform .12s, border-color .12s;
+    -webkit-mask: radial-gradient(circle 11px at calc(100% - 92px) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+                  radial-gradient(circle 11px at calc(100% - 92px) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+            mask: radial-gradient(circle 11px at calc(100% - 92px) 0, #0000 98%, #000) top / 100% 51% no-repeat,
+                  radial-gradient(circle 11px at calc(100% - 92px) 100%, #0000 98%, #000) bottom / 100% 51% no-repeat;
+  }
+  .pass:hover { border-color: #3a5684; }
+  .pass:active { transform: scale(.985); }
+  .pass .t { font: 800 1.18rem/1.15 var(--round); }
+  .pass .s { color: var(--dim); font-size: .9rem; grid-column: 1; }
+  .pass .stub { grid-row: 1 / span 2; grid-column: 2; width: 74px; text-align: center; border-left: 2px dashed #ffffff22; padding-left: 14px; font: 700 .66rem/1.2 var(--mono); color: var(--dim); letter-spacing: .08em; text-transform: uppercase; }
+  .pass .stub b { display: block; font: 800 1.35rem/1.1 var(--mono); color: var(--gold); letter-spacing: 0; margin-top: 2px; }
+  .pass.hero { background: linear-gradient(135deg, #2b3f66, #182a47 60%); min-height: 104px; }
+  .pass.hero .t { font-size: 1.45rem; }
+  .pass.daily .stub b { color: var(--teal); font-size: 1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 14px 8px 10px; border-radius: 999px; background: #ffffff0b; border: 1px solid var(--line); font-weight: 600; font-size: .95rem; }
+  .chip svg { width: 22px; height: 22px; flex: none; color: var(--gold); }
+  .chip small { color: var(--dim); font: 600 .7rem var(--mono); }
+  .chip:active { transform: scale(.97); }
+  .toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; min-height: 56px; border-radius: 14px; background: #ffffff08; border: 1px solid var(--line); width: 100%; text-align: left; }
+  .toggle .sw { width: 50px; height: 30px; border-radius: 999px; background: #33415c; position: relative; flex: none; transition: background .15s; }
+  .toggle .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #dfe5f1; transition: transform .15s; }
+  .toggle[aria-checked="true"] .sw { background: var(--teal); }
+  .toggle[aria-checked="true"] .sw::after { transform: translateX(20px); }
+  .toggle small { display: block; color: var(--dim); font-size: .82rem; }
+
+  .boards { border-radius: 16px; background: #ffffff08; border: 1px solid var(--line); overflow: hidden; }
+  .tabs { display: flex; border-bottom: 1px solid var(--line); }
+  .tabs button { flex: 1; min-height: 46px; font: 700 .78rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); border-bottom: 3px solid transparent; }
+  .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--gold); }
+  ol.rows { list-style: none; margin: 0; padding: 6px 0; }
+  ol.rows li { display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; padding: 8px 14px; }
+  ol.rows li .r { font: 800 .9rem var(--mono); color: var(--dim); }
+  ol.rows li:nth-child(1) .r { color: var(--gold); }
+  ol.rows li .n { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  ol.rows li .n small { color: var(--dim); font-weight: 400; margin-left: 6px; font-size: .8rem; }
+  ol.rows li .p { font: 700 .95rem var(--mono); }
+  ol.rows li.me { background: #f2b84b14; }
+  .empty { padding: 16px; color: var(--dim); text-align: center; font-size: .92rem; }
+
+  /* ---------- play ---------- */
+  .hud { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; margin: 4px 0 10px; }
+  .hud .flight { font: 700 .72rem/1.2 var(--mono); letter-spacing: .12em; color: var(--dim); text-transform: uppercase; }
+  .hud .flight b { display: block; color: var(--ink); font-size: 1.05rem; letter-spacing: .04em; }
+  .hud .score { text-align: right; font: 700 .72rem/1.2 var(--mono); letter-spacing: .12em; color: var(--dim); text-transform: uppercase; }
+  .hud .score b { display: block; color: var(--gold); font-size: 1.25rem; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .streak { justify-self: center; display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px 6px 8px; border-radius: 999px; background: #ffffff0b; border: 1px solid var(--line); font: 800 1rem var(--mono); color: var(--dim); transition: background .2s, color .2s; }
+  .streak svg { width: 22px; height: 22px; }
+  .streak.hot { background: #f08a3c26; border-color: #f08a3c88; color: #ffd29a; }
+  .streak.hot svg { animation: flicker 1s ease-in-out infinite; transform-origin: 50% 90%; }
+  @keyframes flicker { 50% { transform: scale(1.12) rotate(-4deg); } }
+  .strikes { display: flex; gap: 6px; justify-content: center; margin: -2px 0 10px; }
+  .strikes svg { width: 26px; height: 26px; }
+  .strikes .lost { opacity: .28; }
+  .dots { display: flex; gap: 4px; margin-bottom: 10px; }
+  .dots i { flex: 1; height: 6px; border-radius: 3px; background: #ffffff14; }
+  .dots i.ok { background: var(--good); }
+  .dots i.no { background: repeating-linear-gradient(45deg, var(--bad) 0 3px, #f08a3c55 3px 6px); }
+  .dots i.now { background: var(--ink); }
+
+  .timer { height: 10px; border-radius: 5px; background: #ffffff12; overflow: hidden; margin-bottom: 14px; position: relative; }
+  .timer i { position: absolute; inset: 0; transform-origin: left; background: linear-gradient(90deg, var(--teal), var(--gold)); }
+  .timer.low i { background: var(--bad); }
+  .timer-off { height: 10px; margin-bottom: 14px; }
+
+  .card {
+    position: relative; border-radius: 20px; padding: 20px 20px 22px; background: var(--paper); color: var(--paper-ink);
+    box-shadow: 0 10px 30px #0007; overflow: hidden; min-height: 150px;
+  }
+  .card::before { content: ""; position: absolute; inset: 0 0 auto; height: 8px; background: repeating-linear-gradient(90deg, #d9534f 0 18px, var(--paper) 18px 26px, #2f5fa8 26px 44px, var(--paper) 44px 52px); }
+  .card .cat { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; font: 800 .68rem var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #6b5b3e; }
+  .card .cat svg { width: 18px; height: 18px; color: #b07a19; }
+  .card .cat .lvl { margin-left: 6px; color: #9a8c70; }
+  .card .q { font: 800 clamp(1.25rem, 5.6vw, 1.6rem)/1.25 var(--round); margin: 10px 0 0; overflow-wrap: anywhere; }
+  .card .postmark { position: absolute; right: -18px; bottom: -22px; width: 120px; height: 120px; opacity: .09; color: #2a2a33; pointer-events: none; }
+
+  .opts { display: grid; gap: 10px; margin-top: 16px; }
+  .opt {
+    display: grid; grid-template-columns: 40px 1fr 28px; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 10px 14px 10px 10px;
+    border-radius: 16px; background: var(--card2); border: 2px solid var(--line); text-align: left; font-weight: 650; font-size: 1.05rem;
+    transition: transform .1s, background .15s, border-color .15s, opacity .2s; overflow-wrap: anywhere;
+  }
+  .opt .k { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: #ffffff10; font: 800 1rem var(--mono); color: var(--gold); }
+  .opt .mark svg { width: 26px; height: 26px; }
+  .opt:not(:disabled):hover { border-color: #3a5684; }
+  .opt:not(:disabled):active { transform: scale(.98); }
+  .opt:disabled { cursor: default; }
+  .opt.dim { opacity: .45; }
+  .opt.right { background: var(--good); border-color: #bfeaff; color: var(--good-ink); opacity: 1; }
+  .opt.right .k { background: #ffffff55; color: var(--good-ink); }
+  .opt.wrong { background: repeating-linear-gradient(135deg, var(--bad) 0 10px, #e07a2d 10px 20px); border-color: #ffd2ad; color: var(--bad-ink); opacity: 1; }
+  .opt.wrong .k { background: #ffffff55; color: var(--bad-ink); }
+  .opt.pending { border-color: var(--gold); }
+  .opt.pop { animation: pop .35s; }
+  .opt.shake { animation: shake .35s; }
+  @keyframes pop { 40% { transform: scale(1.035); } }
+  @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+  .verdict { margin-top: 14px; border-radius: 16px; padding: 14px 16px; background: #ffffff0b; border: 1px solid var(--line); animation: rise .25s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  .verdict .line { display: flex; align-items: center; gap: 12px; }
+  .stampbox { flex: none; width: 66px; height: 66px; }
+  .stampbox svg { width: 100%; height: 100%; animation: stamp .35s cubic-bezier(.2, 1.6, .4, 1); }
+  @keyframes stamp { from { transform: scale(1.8) rotate(-18deg); opacity: 0; } }
+  .verdict h3 { margin: 0; font: 800 1.2rem/1.2 var(--round); }
+  .verdict .pts { font: 700 .82rem var(--mono); color: var(--dim); margin-top: 2px; }
+  .verdict .pts b { color: var(--gold); }
+  .verdict .ans { margin-top: 10px; font-size: .98rem; }
+  .verdict .extra { margin-top: 6px; color: var(--dim); font-size: .9rem; }
+  .verdict .src { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: .86rem; color: var(--dim); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+  .verdict .src i { color: var(--ink); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 12px 20px; border-radius: 14px; font: 800 1.05rem var(--round); background: var(--gold); color: var(--gold-ink); width: 100%; margin-top: 14px; box-shadow: 0 4px 0 #a87515; transition: transform .08s, box-shadow .08s; }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #a87515; }
+  .btn.ghost { background: #ffffff0d; color: var(--ink); box-shadow: none; border: 1px solid var(--line); }
+  .btn svg { width: 20px; height: 20px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row2 .btn { margin-top: 10px; }
+  .quit { display: block; margin: 18px auto 0; color: var(--dim); font-size: .9rem; min-height: 44px; padding: 0 14px; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ---------- end ---------- */
+  .result { text-align: center; padding: 22px 18px 18px; border-radius: 20px; background: var(--paper); color: var(--paper-ink); position: relative; overflow: hidden; box-shadow: 0 10px 30px #0007; }
+  .result .lab { font: 800 .7rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: #6b5b3e; }
+  .result .big { font: 900 3.2rem/1 var(--round); margin: 8px 0 4px; font-variant-numeric: tabular-nums; }
+  .result .sub { color: #5b5547; }
+  .result .stamp-end { position: absolute; right: 8px; top: 8px; width: 92px; height: 92px; transform: rotate(14deg); opacity: .9; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+  .stats div { border-radius: 12px; background: #2a2a3312; padding: 10px 4px; }
+  .stats b { display: block; font: 800 1.3rem var(--round); }
+  .stats span { font: 700 .62rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #6b5b3e; }
+  .bars { margin-top: 6px; display: grid; gap: 10px; }
+  .bars .b { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; font-size: .92rem; }
+  .bars .b .track { grid-column: 1 / -1; height: 10px; border-radius: 5px; background: #ffffff12; overflow: hidden; }
+  .bars .b .track i { display: block; height: 100%; background: var(--good); }
+  .bars .b span { font: 700 .85rem var(--mono); color: var(--dim); }
+  textarea.share { width: 100%; min-height: 96px; margin-top: 4px; border-radius: 12px; background: #ffffff0b; border: 1px solid var(--line); color: var(--ink); font: .92rem/1.4 var(--mono); padding: 10px 12px; resize: none; }
+  .namebox { display: flex; gap: 8px; margin-top: 4px; }
+  .namebox input { flex: 1; min-width: 0; min-height: 52px; border-radius: 14px; border: 1px solid var(--line); background: #ffffff0b; color: var(--ink); font: 600 1rem var(--sans); padding: 0 14px; }
+  .namebox .btn { width: auto; margin-top: 0; }
+  .note { color: var(--dim); font-size: .85rem; margin-top: 8px; }
+
+  /* ---------- sheets + toast ---------- */
+  .sheet-bg { position: fixed; inset: 0; background: #0009; z-index: 10; display: flex; align-items: flex-end; justify-content: center; animation: fade .15s; }
+  @keyframes fade { from { opacity: 0; } }
+  .sheet { width: var(--col); max-height: 88dvh; overflow-y: auto; background: var(--bg2); border: 1px solid var(--line); border-bottom: 0; border-radius: 20px 20px 0 0; padding: 18px 18px calc(22px + env(safe-area-inset-bottom)); animation: up .2s ease-out; }
+  @keyframes up { from { transform: translateY(40px); opacity: 0; } }
+  .sheet h3 { margin: 0 0 8px; font: 800 1.3rem var(--round); display: flex; justify-content: space-between; align-items: center; }
+  .sheet p { color: #d4d9e3; margin: 8px 0; }
+  .sheet .fine { color: var(--dim); font-size: .86rem; }
+  .sheet dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 12px 0; font-size: .92rem; }
+  .sheet dt { color: var(--dim); }
+  .sheet dd { margin: 0; }
+  .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 20; background: #1f3050; border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; max-width: calc(100vw - 32px); box-shadow: 0 6px 20px #0008; animation: rise .2s; }
+  .loading { text-align: center; color: var(--dim); padding: 60px 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path fill="currentColor" d="M21 15.5v-2l-8-5V3.6c0-.9-.7-1.6-1.5-1.6S10 2.7 10 3.6v4.9l-8 5v2l8-2.5v5.4l-2 1.5V21l3.5-1 3.5 1v-1.6l-2-1.5V13z" transform="translate(1 0)"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c.6 3-1.6 4.6-3 6.3C7.4 10.2 6 12 6 14.6A6 6 0 0 0 12 21a6 6 0 0 0 6-6.2c0-2.3-1.2-4.2-2.4-5.5-.1 1.5-.8 2.6-1.9 3 .4-3.6-.6-7.4-1.7-9.3zM12 19a2.8 2.8 0 0 1-2.8-2.8c0-1.7 1.4-2.6 2.2-3.8.5 1.2 1.6 1.6 2 2.8.2.4.3.7.3 1A2.8 2.8 0 0 1 12 19z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor" opacity=".18"/><path d="M6.5 12.5l3.6 3.6 7.4-8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor" opacity=".18"/><path d="M7.5 7.5l9 9M16.5 7.5l-9 9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.2v.1" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M7 4h10v4a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M12 13v4M8 21h8M9 17h6v4H9z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.5 3.8 5.5 3.8 9s-1.2 6.5-3.8 9c-2.6-2.5-3.8-5.5-3.8-9S9.4 5.5 12 3z"/></g></symbol>
+    <!-- categories -->
+    <symbol id="c-places" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4" fill="currentColor"/></symbol>
+    <symbol id="c-regions" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></symbol>
+    <symbol id="c-capitals" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 20h16M5 20V10M9.5 20V10M14.5 20V10M19 20V10M3 10h18L12 4z"/></symbol>
+    <symbol id="c-money" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="6"/><path d="M15 6.4a6 6 0 0 1 0 11.2M9 9v6"/></g></symbol>
+    <symbol id="c-airports" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h9l3 3v15H6z"/><circle cx="12" cy="6.5" r="1"/><path d="M9 11h6M9 14.5h6M9 18h3"/></g></symbol>
+    <symbol id="c-phrases" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 5h16v10H10l-5 4v-4H4z"/><path d="M8 9.5h8M8 12h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="c-practical" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></symbol>
+    <symbol id="c-population" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2.5 19c.6-3.4 2.8-5 5.5-5s4.9 1.6 5.5 5M13.5 14.6c.9-.7 1.9-1 3-1 2.3 0 4 1.4 4.5 4.4"/></g></symbol>
+    <symbol id="s-ok" viewBox="0 0 100 100"><g fill="none" stroke="#3fb6e8" stroke-width="4"><circle cx="50" cy="50" r="44"/><circle cx="50" cy="50" r="36" stroke-dasharray="3 4"/></g><path d="M30 51l13 13 27-29" fill="none" stroke="#3fb6e8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="s-no" viewBox="0 0 100 100"><g fill="none" stroke="#f08a3c" stroke-width="4"><rect x="8" y="8" width="84" height="84" rx="12"/><rect x="16" y="16" width="68" height="68" rx="8" stroke-dasharray="3 4"/></g><path d="M34 34l32 32M66 34L34 66" stroke="#f08a3c" stroke-width="9" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="../" title="Back to AirplaneMode">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#f2b84b" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="#f2b84b" stroke-width="1.6" stroke-dasharray="2 3"/><path d="M14 32h36M32 12c6 5.5 8.5 12.5 8.5 20S38 46.5 32 52c-6-5.5-8.5-12.5-8.5-20S26 17.5 32 12z" fill="none" stroke="#3cc4b4" stroke-width="2.4"/><path d="M45 17l-12 9-7-1-2 2 6 3-3 5h-3l-1 2 5 1 1 5 2-1v-3l5-3 3 6 2-2-1-7 9-12c1.5-2-.5-4-2-3z" fill="#f2b84b"/></svg>
+      <div><b>Wayfarer</b><small>Travel trivia</small></div>
+    </a>
+    <div style="display:flex;gap:8px">
+      <button class="icon-btn" id="boardsBtn" title="Leaderboards" aria-label="Leaderboards"><svg><use href="#i-trophy"/></svg></button>
+      <button class="icon-btn" id="aboutBtn" title="About Wayfarer" aria-label="About Wayfarer"><svg><use href="#i-info"/></svg></button>
+    </div>
+  </div>
+
+  <main id="view"><div class="loading">Checking in...</div></main>
+</div>
+
+<div id="sheet" hidden></div>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<script>
+"use strict";
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const view = $("#view");
+const KEYS = "ABCD";
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("wayfarer." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("wayfarer." + k, JSON.stringify(v)); } catch { } },
+};
+const S = { meta: null, round: null, q: null, last: null, timer: null, guide: null, busy: false, results: [] };
+
+async function api(path, body, method) {
+  const opt = body === undefined ? { method: method || "GET" } : { method: method || "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const r = await fetch(path, { ...opt, cache: "no-store" });
+  let data = null;
+  try { data = await r.json(); } catch { }
+  if (!r.ok) { const e = new Error((data && data.detail && (typeof data.detail === "string" ? data.detail : "Something went wrong.")) || "The box didn't answer."); e.status = r.status; throw e; }
+  return data;
+}
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 3200);
+}
+const icon = (id, cls = "") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"/></svg>`;
+const catIcon = c => icon("c-" + (["places", "regions", "capitals", "money", "airports", "phrases", "practical", "population"].includes(c) ? c : "places"));
+
+// ---------- seen questions (so new rounds prefer ones this browser hasn't had) ----------
+function markSeen(id) {
+  let seen = store.get("seen", []);
+  seen = seen.filter(x => x !== id); seen.push(id);
+  store.set("seen", seen.slice(-800));
+}
+
+// ---------- the Travel Guide, if it's on this box ----------
+async function findGuide() {
+  try {
+    const apps = await fetch("../api/apps", { cache: "no-store" }).then(r => r.ok ? r.json() : []);
+    const g = Array.isArray(apps) && apps.find(a => a && a.id === "guide");
+    if (!g) return;
+    const base = "../" + String(g.path || "/guide/").replace(/^\/+/, "");
+    let zim = null;
+    try {
+      const h = await fetch(base + "health", { cache: "no-store" }).then(r => r.ok ? r.json() : null);
+      const zims = (h && h.zims) || [];
+      const pick = zims.find(z => /wikivoyage/i.test(z.name || z.id)) || zims[0];
+      zim = pick ? pick.id : null;
+    } catch { }
+    S.guide = { base, zim };
+  } catch { }
+}
+function guideLink(src) {
+  if (!S.guide || !src) return "";
+  const href = S.guide.zim
+    ? `${S.guide.base}z/${encodeURIComponent(S.guide.zim)}/${src.path.split("/").map(encodeURIComponent).join("/")}`
+    : `${S.guide.base}?q=${encodeURIComponent(src.title)}`;
+  return `<a href="${esc(href)}" target="_blank" rel="noopener">Read it in the Travel Guide &rarr;</a>`;
+}
+
+// ---------- home ----------
+function home() {
+  stopTimer();
+  S.round = null; S.q = null;
+  const m = S.meta;
+  const timed = store.get("timed", true);
+  const daily = store.get("daily", {});
+  const playedToday = daily.date === m.daily;
+  view.innerHTML = `
+    <h2>Departures</h2>
+    <button class="pass hero" data-mode="quick">
+      <span class="t">Quick round</span><span class="s">Ten questions from all over the map. Gets harder as you go.</span>
+      <span class="stub">Gate<b>Q10</b></span>
+    </button>
+    <button class="pass daily" data-mode="daily">
+      <span class="t">Daily flight</span><span class="s">${playedToday ? `You scored <b>${daily.score}</b> today. Same ten for everyone on this hotspot.` : "Same ten questions for everyone on this hotspot today."}</span>
+      <span class="stub">${esc(m.daily.slice(5).replace("-", " / "))}<b>${playedToday ? "&#10003;" : "Daily"}</b></span>
+    </button>
+    <button class="pass" data-mode="endless">
+      <span class="t">Endless</span><span class="s">Keep going until you miss three.</span>
+      <span class="stub">Lives<b>3</b></span>
+    </button>
+    <h2>Pick a category</h2>
+    <div class="chips">${m.categories.map(c => `<button class="chip" data-mode="category" data-cat="${esc(c.id)}" title="${esc(c.blurb)}">${catIcon(c.id)}${esc(c.name)}</button>`).join("")}</div>
+    <h2>Pick a region</h2>
+    <div class="chips">${m.regions.map(r => `<button class="chip" data-mode="region" data-region="${esc(r.id)}">${icon("i-globe")}${esc(r.id)} <small>${r.count}</small></button>`).join("")}</div>
+    <h2>Cabin settings</h2>
+    <button class="toggle" id="timedToggle" role="switch" aria-checked="${timed}">
+      <span><b>20-second timer</b><small>Run out of time and it counts as a miss. Fast answers score more either way.</small></span><span class="sw" aria-hidden="true"></span>
+    </button>
+    <h2>Leaderboards</h2>
+    <div class="boards" id="homeBoards"><div class="empty">Loading...</div></div>
+  `;
+  view.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => start(b.dataset.mode, { cat: b.dataset.cat, region: b.dataset.region }));
+  $("#timedToggle").onclick = e => {
+    const el = e.currentTarget, on = el.getAttribute("aria-checked") !== "true";
+    el.setAttribute("aria-checked", on); store.set("timed", on);
+  };
+  loadHomeBoards();
+  window.scrollTo(0, 0);
+}
+
+async function loadHomeBoards(sel) {
+  const box = $("#homeBoards"); if (!box) return;
+  try {
+    const d = await api("api/leaderboards");
+    const tabs = d.boards;
+    let cur = sel || store.get("tab", tabs[0].board);
+    if (!tabs.find(t => t.board === cur)) cur = tabs[0].board;
+    const t = tabs.find(t => t.board === cur);
+    box.innerHTML = `<div class="tabs" role="tablist">${tabs.map(x => `<button role="tab" aria-selected="${x.board === cur}" data-b="${esc(x.board)}">${esc(x.board.startsWith("daily") ? "Daily" : x.label.replace(" round", ""))}</button>`).join("")}</div>${rowsHtml(t.rows)}`;
+    box.querySelectorAll("[data-b]").forEach(b => b.onclick = () => { store.set("tab", b.dataset.b); loadHomeBoards(b.dataset.b); });
+  } catch { box.innerHTML = `<div class="empty">Couldn't load the boards.</div>`; }
+}
+function rowsHtml(rows, me) {
+  if (!rows || !rows.length) return `<div class="empty">No scores yet. Be the first on the board.</div>`;
+  return `<ol class="rows">${rows.map(r => `<li class="${me && r.name.toLowerCase() === me.toLowerCase() ? "me" : ""}"><span class="r">${r.rank}</span><span class="n">${esc(r.name)}<small>${r.right}/${r.answered}</small></span><span class="p">${r.score}</span></li>`).join("")}</ol>`;
+}
+
+// ---------- a round ----------
+async function start(mode, opts = {}) {
+  if (S.busy) return; S.busy = true;
+  try {
+    const timed = store.get("timed", true);
+    S.round = await api("api/rounds", { mode, cat: opts.cat || null, region: opts.region || null, timed, seen: store.get("seen", []) });
+    S.results = [];
+    await next();
+  } catch (e) { toast(e.message); }
+  finally { S.busy = false; }
+}
+
+async function next() {
+  stopTimer();
+  try {
+    S.q = await api(`api/rounds/${S.round.id}/next`, {});
+  } catch (e) {
+    if (e.status === 409) return end();
+    toast(e.message); return home();
+  }
+  markSeen(S.q.id);
+  renderQuestion();
+}
+
+function hudHtml(st) {
+  const r = S.round;
+  const n = st.n !== undefined ? st.n : st.answered;
+  const flight = r.mode === "endless" ? `Q ${n + 1}` : `${String(n + 1).padStart(2, "0")}/${String(r.total).padStart(2, "0")}`;
+  return `<div class="hud">
+      <div class="flight">${esc(r.label.startsWith("Daily") ? "Daily flight" : r.label.replace(/^(Category|Region): /, ""))}<b>${flight}</b></div>
+      <div class="streak ${st.streak >= 2 ? "hot" : ""}" title="Streak" aria-label="Streak ${st.streak}">${icon("i-flame")}<span>${st.streak}</span></div>
+      <div class="score">Score<b id="scoreNum">${st.score}</b></div>
+    </div>
+    ${r.mode === "endless"
+      ? `<div class="strikes" aria-label="${3 - st.strikes} lives left">${[0, 1, 2].map(i => `<svg class="${i < st.strikes ? "lost" : ""}" style="color:${i < st.strikes ? "#6b7690" : "#f2b84b"}"><use href="#i-plane"/></svg>`).join("")}</div>`
+      : `<div class="dots" aria-hidden="true">${Array.from({ length: r.total }, (_, i) => `<i class="${i < S.results.length ? (S.results[i] ? "ok" : "no") : i === n ? "now" : ""}"></i>`).join("")}</div>`}`;
+}
+
+function renderQuestion() {
+  const q = S.q;
+  view.innerHTML = `
+    <div id="hud">${hudHtml(q)}</div>
+    ${q.timed ? `<div class="timer" id="timer" role="progressbar" aria-label="Time left"><i></i></div>` : `<div class="timer-off"></div>`}
+    <div class="card">
+      <div class="cat">${catIcon(q.cat)}${esc(q.cat_name)}<span class="lvl">${"&#9679;".repeat(q.diff)}${"&#9675;".repeat(3 - q.diff)}</span></div>
+      <p class="q">${esc(q.q)}</p>
+      <svg class="postmark" viewBox="0 0 24 24"><use href="#i-globe"/></svg>
+    </div>
+    <div class="opts" id="opts">${q.options.map((o, i) => `<button class="opt" data-i="${i}"><span class="k">${KEYS[i]}</span><span class="t">${esc(o)}</span><span class="mark"></span></button>`).join("")}</div>
+    <div id="after"></div>
+    <button class="quit" id="quit">Leave this round</button>`;
+  view.querySelectorAll(".opt").forEach(b => b.onclick = () => choose(+b.dataset.i));
+  $("#quit").onclick = () => { if (confirm("Leave this round? Your score won't count.")) home(); };
+  if (q.timed) startTimer(q.remaining ?? q.limit, q.limit);
+  window.scrollTo(0, 0);
+}
+
+function startTimer(remaining, limit) {
+  const bar = $("#timer i"), box = $("#timer");
+  const endAt = performance.now() + remaining * 1000;
+  const tick = () => {
+    const left = Math.max(0, endAt - performance.now()) / 1000;
+    bar.style.transform = `scaleX(${left / limit})`;
+    box.classList.toggle("low", left < 5);
+    box.setAttribute("aria-valuenow", Math.ceil(left));
+    if (left <= 0) { S.timer = null; choose(null); return; }
+    S.timer = requestAnimationFrame(tick);
+  };
+  tick();
+}
+function stopTimer() { if (S.timer) cancelAnimationFrame(S.timer); S.timer = null; }
+
+async function choose(i) {
+  if (!S.q || S.q.answered) return;
+  S.q.answered = true;
+  stopTimer();
+  const btns = [...view.querySelectorAll(".opt")];
+  btns.forEach(b => b.disabled = true);
+  if (i !== null) btns[i].classList.add("pending");
+  let res;
+  try {
+    res = await api(`api/rounds/${S.round.id}/answer`, { n: S.q.n, choice: i });
+  } catch (e) {
+    toast(e.message);
+    if (e.status === 404) return home();
+    return next();
+  }
+  S.last = res;
+  S.results.push(res.correct);
+  btns.forEach((b, k) => {
+    b.classList.remove("pending");
+    if (k === res.answer) { b.classList.add("right"); b.querySelector(".mark").innerHTML = icon("i-check"); if (res.correct) b.classList.add("pop"); }
+    else if (k === i) { b.classList.add("wrong", "shake"); b.querySelector(".mark").innerHTML = icon("i-cross"); }
+    else b.classList.add("dim");
+  });
+  $("#hud").innerHTML = hudHtml({ ...res, n: S.q.n });
+  const p = res.points;
+  const title = res.correct ? ["Cleared for landing!", "Spot on!", "Right on course!", "Nailed it!", "Stamped and approved!"][S.q.n % 5]
+    : res.timeout || res.late ? "Out of time" : "Not this time";
+  const ptsLine = res.correct
+    ? `<b>+${p.total}</b> &nbsp;${p.base} answer${p.speed ? ` + ${p.speed} speed` : ""}${p.streak ? ` + ${p.streak} streak` : ""}`
+    : (S.round.mode === "endless" ? `Strike ${res.strikes} of ${S.round.strikes_max}` : "No points, streak reset");
+  $("#after").innerHTML = `
+    <div class="verdict" role="status">
+      <div class="line">
+        <div class="stampbox">${res.correct ? `<svg viewBox="0 0 100 100"><use href="#s-ok"/></svg>` : `<svg viewBox="0 0 100 100"><use href="#s-no"/></svg>`}</div>
+        <div><h3>${esc(title)}</h3><div class="pts">${ptsLine}</div></div>
+      </div>
+      ${res.correct ? "" : `<div class="ans">The answer: <b>${esc(res.answer_text)}</b></div>`}
+      ${res.extra ? `<div class="extra">${esc(res.extra)}</div>` : ""}
+      <div class="src"><span>From the Wikivoyage article <i>${esc(res.source.title)}</i></span>${guideLink(res.source)}</div>
+    </div>
+    <button class="btn" id="nextBtn">${res.done ? "See your boarding pass" : "Next question"} &rarr;</button>`;
+  $("#nextBtn").onclick = () => res.done ? end() : next();
+  $("#nextBtn").focus({ preventScroll: true });
+  $("#after").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+}
+
+// ---------- end of a round ----------
+async function end() {
+  stopTimer();
+  let s;
+  try { s = await api(`api/rounds/${S.round.id}`); } catch (e) { toast(e.message); return home(); }
+  if (s.mode === "daily") store.set("daily", { date: s.date, score: s.score });
+  const name = store.get("name", "");
+  const verdict = s.accuracy >= 90 ? "Seasoned globetrotter" : s.accuracy >= 70 ? "Frequent flyer" : s.accuracy >= 40 ? "Weekend wanderer" : "First-time flyer";
+  view.innerHTML = `
+    <h2>Arrivals</h2>
+    <div class="result">
+      <svg class="stamp-end" viewBox="0 0 100 100"><use href="#s-ok"/></svg>
+      <div class="lab">${esc(s.label)}</div>
+      <div class="big">${s.score}</div>
+      <div class="sub">points &middot; ${esc(verdict)}</div>
+      <div class="stats">
+        <div><b>${s.right}/${s.answered}</b><span>Right</span></div>
+        <div><b>${s.accuracy}%</b><span>Accuracy</span></div>
+        <div><b>${s.best_streak}</b><span>Best streak</span></div>
+      </div>
+    </div>
+    <h2>By category</h2>
+    <div class="bars">${s.categories.map(c => `<div class="b"><div>${catIcon(c.cat).replace("<svg", '<svg style="width:18px;height:18px;vertical-align:-3px;color:#f2b84b;margin-right:6px"')}${esc(c.name)}</div><span>${c.right}/${c.total}</span><div class="track"><i style="width:${Math.round(100 * c.right / c.total)}%"></i></div></div>`).join("")}</div>
+    <h2>Leaderboard</h2>
+    <div id="submitBox">${s.can_submit ? `
+      <form class="namebox" id="nameForm"><input id="nameIn" maxlength="16" placeholder="Your name" autocomplete="nickname" value="${esc(name)}" aria-label="Your name for the leaderboard"><button class="btn" type="submit">Post score</button></form>
+      <div class="note">Names only. Scores are kept on this box${S.meta.leaderboard_saved ? "" : " until it restarts"}.</div>` : `<div class="note">${s.answered ? "Already on the board." : "Answer at least one question to get on the board."}</div>`}</div>
+    <div class="boards" id="endBoard" style="margin-top:12px"><div class="empty">Loading...</div></div>
+    <h2>Share</h2>
+    <textarea class="share" id="shareText" readonly>${esc(s.share)}</textarea>
+    <div class="row2">
+      <button class="btn ghost" id="copyBtn">Copy</button>
+      <button class="btn" id="againBtn">Play again</button>
+    </div>
+    <button class="quit" id="homeBtn">Back to departures</button>`;
+  const again = { mode: S.round.mode, cat: S.round.board.startsWith("cat:") ? S.round.board.slice(4) : null, region: S.round.board.startsWith("region:") ? S.round.board.slice(7) : null };
+  $("#againBtn").onclick = () => start(again.mode, again);
+  $("#homeBtn").onclick = home;
+  $("#copyBtn").onclick = () => copy($("#shareText"));
+  const board = s.board;
+  showBoard($("#endBoard"), board, name);
+  const form = $("#nameForm");
+  if (form) form.onsubmit = async e => {
+    e.preventDefault();
+    const nm = $("#nameIn").value.trim();
+    if (!nm) { toast("Type a name for the board."); return; }
+    try {
+      const r = await api(`api/rounds/${S.round.id}/submit`, { name: nm });
+      store.set("name", r.name);
+      $("#submitBox").innerHTML = `<div class="note">You're <b>#${r.rank}</b> on ${esc(r.label)}.</div>`;
+      $("#endBoard").innerHTML = rowsHtml(r.rows, r.name);
+    } catch (err) { toast(err.message); }
+  };
+  window.scrollTo(0, 0);
+}
+
+async function showBoard(el, board, me) {
+  try { const d = await api(`api/leaderboard?board=${encodeURIComponent(board)}`); el.innerHTML = rowsHtml(d.rows, me); }
+  catch { el.innerHTML = `<div class="empty">Couldn't load the board.</div>`; }
+}
+
+function copy(ta) {
+  const text = ta.value;
+  const done = () => toast("Copied. Paste it anywhere.");
+  if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(text).then(done, () => fallback()); return; }
+  fallback();
+  function fallback() {
+    ta.focus(); ta.select(); ta.setSelectionRange(0, text.length);
+    let ok = false; try { ok = document.execCommand("copy"); } catch { }
+    ok ? done() : toast("Selected: use your phone's Copy.");
+  }
+}
+
+// ---------- sheets ----------
+function sheet(html) {
+  const el = $("#sheet");
+  el.innerHTML = `<div class="sheet-bg" id="sheetBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  el.hidden = false;
+  $("#sheetBg").onclick = e => { if (e.target.id === "sheetBg" || e.target.closest("[data-close]")) closeSheet(); };
+  const first = el.querySelector("button, a, input"); if (first) first.focus({ preventScroll: true });
+}
+function closeSheet() { $("#sheet").hidden = true; $("#sheet").innerHTML = ""; }
+const closeBtn = `<button class="icon-btn" data-close aria-label="Close">&#10005;</button>`;
+
+function about() {
+  const src = S.meta.source;
+  sheet(`<h3>About Wayfarer ${closeBtn}</h3>
+    <p>Travel trivia for the journey. Every question comes from facts in <b>Wikivoyage</b>, the free travel guide: where places are, capitals, money, airport codes, phrasebooks and the practical stuff (mains voltage, driving side, time zones, emergency and calling codes).</p>
+    <dl>
+      <dt>Questions</dt><dd>${S.meta.count.toLocaleString()}</dd>
+      <dt>Source</dt><dd>${esc(src.title)} (${esc(src.site)})</dd>
+      <dt>Snapshot</dt><dd>${esc(src.date)}<br><span class="fine">${esc(src.zim)}</span></dd>
+      <dt>Licence</dt><dd>Text from Wikivoyage, available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">Creative Commons Attribution-ShareAlike 4.0</a> licence. Questions adapted from Wikivoyage articles by Wikivoyage contributors.</dd>
+    </dl>
+    <p class="fine">Scoring: 100 to 150 points per right answer (harder questions are worth more), up to 50 more for speed, and a streak bonus of 10 per answer in a row (up to 50). Facts are as Wikivoyage had them on the snapshot date; borders, currencies and codes change.</p>
+    <p class="fine">Part of AirplaneMode. Everything runs on this box: no internet needed.</p>`);
+}
+
+async function boards() {
+  const tabs = [["quick", "Quick"], [`daily:${S.meta.daily}`, "Daily"], ["endless", "Endless"]];
+  sheet(`<h3>Leaderboards ${closeBtn}</h3>
+    <div class="boards"><div class="tabs" role="tablist">${tabs.map(([b, l], i) => `<button role="tab" aria-selected="${i === 0}" data-b="${esc(b)}">${l}</button>`).join("")}</div><div id="sheetBoard"><div class="empty">Loading...</div></div></div>
+    <p class="fine">Each name keeps its best score. Category and region rounds have boards of their own: you'll see them at the end of a round.</p>`);
+  const show = b => {
+    document.querySelectorAll("#sheet [data-b]").forEach(x => x.setAttribute("aria-selected", x.dataset.b === b));
+    showBoard($("#sheetBoard"), b, store.get("name", ""));
+  };
+  document.querySelectorAll("#sheet [data-b]").forEach(x => x.onclick = () => show(x.dataset.b));
+  show(tabs[0][0]);
+}
+
+$("#aboutBtn").onclick = () => S.meta && about();
+$("#boardsBtn").onclick = () => S.meta && boards();
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("#sheet").hidden) return closeSheet();
+  if (!$("#sheet").hidden || e.target.matches("input, textarea")) return;
+  if (S.q && !S.q.answered) {
+    const k = { a: 0, b: 1, c: 2, d: 3, 1: 0, 2: 1, 3: 2, 4: 3 }[e.key.toLowerCase()];
+    if (k !== undefined) { e.preventDefault(); choose(k); }
+  }
+});
+
+(async function boot() {
+  findGuide();
+  try { S.meta = await api("api/meta"); home(); }
+  catch (e) { view.innerHTML = `<div class="loading">Couldn't reach the game on this box. Pull down to retry.</div>`; }
+})();
+</script>
+</body>
+</html>

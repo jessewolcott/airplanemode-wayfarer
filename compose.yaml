@@ -1,0 +1,17 @@
+# Standalone development:
+#   docker compose up -d --build      ->  http://localhost:8773
+# On the box, Wayfarer runs from the airplanemode platform repo at /wayfarer/.
+
+name: wayfarer-dev
+
+services:
+  wayfarer:
+    build: .
+    volumes:
+      - wayfarer-data:/data      # the leaderboard: survives restarts and rebuilds
+    ports:
+      - "${PORT:-8773}:8000"
+    mem_limit: 64m
+
+volumes:
+  wayfarer-data:

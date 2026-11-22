@@ -1,0 +1,14 @@
+# AirplaneMode app manifest. See the platform repo: docs/app-contract.md
+id: wayfarer
+name: Wayfarer
+description: Travel trivia from Wikivoyage. Quick rounds, a daily flight for everyone on the hotspot, and a shared leaderboard.
+image: ghcr.io/jessewolcott/airplanemode-wayfarer
+port: 8000
+path: /wayfarer/
+memory: 64m           # the question bank (~1.4 MB of JSON) lives in memory; rounds are small
+volume: /data         # the leaderboard (scores.json): optional, without it scores last until a restart
+needs:
+  llm: none
+env:
+  DATA_DIR: Where the leaderboard is kept (default /data; empty = in memory only).
+  TZ: The box's time zone, for when the daily flight changes (default UTC).

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Wayfarer">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2129"/>
+      <stop offset="1" stop-color="#0d0f12"/>
+    </linearGradient>
+    <linearGradient id="ink" gradientUnits="userSpaceOnUse" x1="0" y1="96" x2="0" y2="430">
+      <stop offset="0" stop-color="#f7cf7a"/>
+      <stop offset="1" stop-color="#f2b84b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="6" y="6" width="500" height="500" rx="106" fill="none" stroke="#2b313b" stroke-width="4"/>
+  <!-- a passport stamp: a ring with a dashed inner ring, a globe, and a plane crossing it -->
+  <circle cx="256" cy="256" r="172" fill="none" stroke="#f2b84b" stroke-width="22" opacity=".75"/>
+  <circle cx="256" cy="256" r="138" fill="none" stroke="#f2b84b" stroke-width="8" stroke-dasharray="14 16" opacity=".5"/>
+  <g fill="none" stroke="#f2b84b" stroke-width="14" opacity=".55">
+    <path d="M150 256h212"/>
+    <path d="M256 150c34 30 50 66 50 106s-16 76-50 106c-34-30-50-66-50-106s16-76 50-106z"/>
+  </g>
+  <path d="M352 150c10-8 26 6 18 18l-58 78 10 62-16 16-36-60-40 28v28l-14 12-12-40-40-12 12-14h28l28-40-60-36 16-16 62 10z" fill="url(#ink)"/>
+</svg>

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+# stage 1 of the bank build (facts pulled from the ZIM): big and regenerable
+.cache/
+.scratch/
