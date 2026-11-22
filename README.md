@@ -50,7 +50,13 @@ from and how to regenerate it when a new ZIM comes out.
 
 ## Screenshots
 
-To come.
+<p align="center">
+  <img src="docs/screenshots/home.png" width="230" alt="Home: modes, categories and regions">
+  <img src="docs/screenshots/question.png" width="230" alt="A question with the timer running">
+  <img src="docs/screenshots/answer.png" width="230" alt="The answer, with the source article and a link to the Travel Guide">
+</p>
+
+<sub>From a laptop browser at phone size; not yet tested on real phones or hardware.</sub>
 
 ## Credits and licence
 

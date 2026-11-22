@@ -48,10 +48,10 @@ or the VS Code task "Bank: regenerate from the guide's ZIM". In Git Bash set `MS
 ## Not verified yet
 
 - Memory and speed on the R6S (arm64); picking a round is ~5k-question list scans, fast on a PC.
-- The page has not been opened in a browser yet (only served and checked by curl and the tests;
-  the JS passes `node --check`). Try it on a phone and a laptop before releasing.
+- Real phones. The page was played in a phone-sized desktop browser through the platform's dev
+  stack (Caddy), including the Travel Guide link.
 
 ## Releasing
 
 Push a `vX.Y.Z` tag. CI tests, then publishes `ghcr.io/jessewolcott/airplanemode-wayfarer:X.Y.Z`
-(arm64 + amd64). **Ask Jesse before pushing a release tag.** Not released yet.
+(arm64 + amd64). **Ask Jesse before pushing a release tag.** Released: 0.1.0 (pinned in the platform's `compose.yaml`).
