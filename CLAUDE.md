@@ -30,8 +30,9 @@ or the VS Code task "Bank: regenerate from the guide's ZIM". In Git Bash set `MS
   counts and a sample, run the tests (they include a bank sanity check), commit both.
 - Keep `DISPUTED` places out (not asked, not offered). Quality over quantity: drop a kind of
   question rather than ship noisy ones.
-- Question ids are hashes of kind + text + answer: keep it that way so browsers' "seen" lists
-  survive rebuilds.
+- Question ids are hashes of kind + text + answer (plus the sorted wrong answers for the "odd
+  one out" kinds `population`, `drive` and `voltage`, whose text alone isn't unique): keep it
+  that way so browsers' "seen" lists survive rebuilds.
 - Page: relative URLs only (`api/...`; the guide link is `../guide/z/<zim>/<path>` and only shown
   when `../api/apps` lists `guide`). No external assets; the CC licence link is just a link.
 - Leaderboard: `DATA_DIR/scores.json`, written atomically, capped (50 per board, 14 daily boards).

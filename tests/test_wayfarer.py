@@ -220,9 +220,13 @@ def test_round_uses_seen_list_from_the_browser():
 def test_points():
     assert quiz.points(False, 3, 1.0, 0) == {"base": 0, "speed": 0, "streak": 0, "total": 0}
     p = quiz.points(True, 1, 10.0, 1)
-    assert p == {"base": 100, "speed": 25, "streak": 0, "total": 125}, p
+    assert p == {"base": 100, "speed": 26, "streak": 0, "total": 126}, p
     assert quiz.points(True, 3, 0.0, 1)["speed"] == 0          # inhumanly fast: no speed bonus
-    assert quiz.points(True, 2, quiz.MIN_HUMAN, 1)["speed"] == 49
+    assert quiz.points(True, 2, quiz.MIN_HUMAN, 1)["speed"] == quiz.SPEED_MAX == 50   # the fastest that counts
+    assert quiz.points(True, 2, quiz.MIN_HUMAN + 0.1, 1)["speed"] == 50
+    assert quiz.points(True, 2, quiz.TIME_LIMIT - 0.01, 1)["speed"] == 0
+    speeds = [quiz.points(True, 1, quiz.MIN_HUMAN + i / 10, 1)["speed"] for i in range(196)]
+    assert speeds == sorted(speeds, reverse=True) and max(speeds) <= quiz.SPEED_MAX
     assert quiz.points(True, 1, 25.0, 1)["speed"] == 0         # untimed and slow: answer points only
     assert quiz.points(True, 1, 5.0, 3)["streak"] == 20
     assert quiz.points(True, 1, 5.0, 50)["streak"] == quiz.STREAK_CAP
@@ -270,6 +274,26 @@ def test_questions_go_out_without_answers():
     again = ok(c.post(f"/api/rounds/{rd['id']}/next"))
     assert again["options"] == q["options"] and again["n"] == q["n"]
     assert abs(again["remaining"] - (quiz.TIME_LIMIT - 3)) < 0.01
+
+
+def test_resume_after_a_reload():
+    """A reloaded page asks `next` again with the round id it kept: same question, its dots, no answers."""
+    rd = new_round()
+    rid = rd["id"]
+    q = ok(c.post(f"/api/rounds/{rid}/next"))
+    assert q["results"] == []
+    clock.tick(2)
+    ok(c.post(f"/api/rounds/{rid}/answer", json={"n": 0, "choice": right_index(q)}))
+    q1 = ok(c.post(f"/api/rounds/{rid}/next"))
+    clock.tick(4)
+    again = ok(c.post(f"/api/rounds/{rid}/next"))                  # the reload
+    assert again["n"] == q1["n"] == 1 and again["options"] == q1["options"] and again["results"] == [True]
+    assert abs(again["remaining"] - (quiz.TIME_LIMIT - 4)) < 0.01   # the clock didn't restart
+    for leak in ('"a"', '"d"', '"answer"', '"src"', '"path"', '"x"'):
+        assert leak not in json.dumps(again), leak
+    # endless rounds don't send the list (it can be 300 long and the page shows lives instead)
+    e = new_round(mode="endless")
+    assert ok(c.post(f"/api/rounds/{e['id']}/next"))["results"] == []
 
 
 def test_answer_validation():
@@ -335,6 +359,34 @@ def test_full_round_summary_and_leaderboard():
     assert [b["board"].split(":")[0] for b in lb["boards"]] == ["quick", "daily", "endless"]
 
 
+def test_finished_round_stays_alive_while_its_end_screen_is_used():
+    rd = new_round()
+    rid = rd["id"]
+    play(rid, right_index)
+    ttl = wf.rounds.ttl
+    clock.tick(ttl - 10)
+    ok(c.get(f"/api/rounds/{rid}"))                         # the end screen's summary refreshes it
+    clock.tick(ttl - 10)
+    ok(c.post(f"/api/rounds/{rid}/submit", json={"name": "Late Lou"}))  # > ttl after the last answer
+    clock.tick(ttl + 1)
+    ok(c.get(f"/api/rounds/{rid}"), 404)                    # really idle: gone
+
+
+def test_meta_reports_a_failed_leaderboard_write():
+    d = tempfile.mkdtemp(prefix="wayfarer-store-")
+    s = Store(d)
+    assert s.persistent
+    s.path = Path(d) / "missing-folder" / "scores.json"    # the write will fail (like a full or read-only disk)
+    old, wf.store = wf.store, s
+    try:
+        assert ok(c.get("/api/meta"))["leaderboard_saved"] is True
+        s.add("quick", "Ann", 10, 1, 1, 1)
+        assert not s.persistent and s.top("quick")[0]["name"] == "Ann"     # carries on in memory
+        assert ok(c.get("/api/meta"))["leaderboard_saved"] is False
+    finally:
+        wf.store = old
+
+
 def test_endless_ends_after_three_strikes():
     rd = new_round(mode="endless")
     assert rd["total"] is None
@@ -346,6 +398,7 @@ def test_endless_ends_after_three_strikes():
     answers = play(rd["id"], choose)
     assert len(answers) == 26, len(answers)                  # 23 right, then three strikes
     assert answers[-1][1]["strikes"] == 3 and answers[-1][1]["done"]
+    assert "23 right before three strikes" in ok(c.get(f"/api/rounds/{rd['id']}"))["share"]
     ids = [q["id"] for q, _ in answers]
     assert len(set(ids)) == len(ids)
 
@@ -400,6 +453,8 @@ def test_endless_long_run_never_crashes():
         t += 3
         r.answer(q["n"], q["options"].index(BANK.by_id[q["id"]]["a"]), t)
     assert len(r.answers) == quiz.ENDLESS_MAX
+    share = r.summary()["share"]                             # stopped at the cap, not by strikes
+    assert "three strikes" not in share and f"{quiz.ENDLESS_MAX}/{quiz.ENDLESS_MAX} right" in share, share
 
 
 # ---------------------------------------------------------------- leaderboard store

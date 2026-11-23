@@ -6,7 +6,8 @@
 .scratch
 tests
 **/__pycache__
-*.md
+**/*.md
 compose.yaml
 docs
 bank/*.py
+llm

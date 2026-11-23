@@ -260,6 +260,12 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem("wayfarer." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem("wayfarer." + k, JSON.stringify(v)); } catch { } },
 };
+// the round in progress, for this tab only: a reload picks it up again (the server keeps the answers)
+const live = {
+  get() { try { const v = JSON.parse(sessionStorage.getItem("wayfarer.round")); return v && typeof v.id === "string" ? v : null; } catch { return null; } },
+  set(r) { try { sessionStorage.setItem("wayfarer.round", JSON.stringify(r)); } catch { } },
+  clear() { try { sessionStorage.removeItem("wayfarer.round"); } catch { } },
+};
 const S = { meta: null, round: null, q: null, last: null, timer: null, guide: null, busy: false, results: [] };
 
 async function api(path, body, method) {
@@ -313,6 +319,7 @@ function guideLink(src) {
 function home() {
   stopTimer();
   S.round = null; S.q = null;
+  live.clear();
   const m = S.meta;
   const timed = store.get("timed", true);
   const daily = store.get("daily", {});
@@ -375,6 +382,7 @@ async function start(mode, opts = {}) {
     const timed = store.get("timed", true);
     S.round = await api("api/rounds", { mode, cat: opts.cat || null, region: opts.region || null, timed, seen: store.get("seen", []) });
     S.results = [];
+    live.set(S.round);
     await next();
   } catch (e) { toast(e.message); }
   finally { S.busy = false; }
@@ -388,6 +396,7 @@ async function next() {
     if (e.status === 409) return end();
     toast(e.message); return home();
   }
+  if (Array.isArray(S.q.results)) S.results = S.q.results;
   markSeen(S.q.id);
   renderQuestion();
 }
@@ -610,7 +619,11 @@ document.addEventListener("keydown", e => {
 
 (async function boot() {
   findGuide();
-  try { S.meta = await api("api/meta"); home(); }
+  try {
+    S.meta = await api("api/meta");
+    const saved = live.get();      // reloaded mid-round: same question, its clock still running
+    if (saved) { S.round = saved; await next(); } else home();
+  }
   catch (e) { view.innerHTML = `<div class="loading">Couldn't reach the game on this box. Pull down to retry.</div>`; }
 })();
 </script>

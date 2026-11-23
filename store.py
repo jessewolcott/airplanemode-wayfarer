@@ -47,7 +47,6 @@ class Store:
     def __init__(self, folder):
         folder = usable_dir(folder)
         self.path = folder / "scores.json" if folder else None
-        self.persistent = self.path is not None
         self.lock = threading.Lock()
         self.boards = {}
         if self.path and self.path.exists():
@@ -57,6 +56,11 @@ class Store:
                     self.boards = data["boards"]
             except (OSError, ValueError):
                 pass   # a damaged file shouldn't stop the game; it's rebuilt on the next write
+
+    @property
+    def persistent(self):
+        """True while scores reach the disk; a failed write switches to memory and makes this False."""
+        return self.path is not None
 
     def _save(self):
         if not self.path:

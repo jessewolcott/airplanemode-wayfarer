@@ -25,8 +25,10 @@ bank (`source`) and shown in the app's About sheet.
    a sample, run `python tests/test_wayfarer.py`, commit the new bank, release.
 
 The build is deterministic: the same ZIM gives byte-identical output (fixed seed, gzip mtime 0).
-A question's id is a hash of its kind, text and answer, so the browser's "recently seen" list
-keeps working across rebuilds for the questions that didn't change.
+A question's id is a hash of its kind, text and answer (and, for the "odd one out" kinds
+`population`, `drive` and `voltage`, whose text is the same for many questions, its sorted wrong
+answers too), so the browser's "recently seen" list keeps working across rebuilds for the
+questions that didn't change.
 
 ## What the questions are made from
 

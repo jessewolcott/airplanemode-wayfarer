@@ -18,7 +18,7 @@
 			"label": "Tests: Wayfarer",
 			"type": "shell",
 			"command": ".venv/Scripts/python tests/test_wayfarer.py",
-			"windows": { "command": ".venv\Scripts\python tests/test_wayfarer.py" },
+			"windows": { "command": ".venv\\Scripts\\python tests/test_wayfarer.py" },
 			"group": { "kind": "test", "isDefault": true },
 			"problemMatcher": []
 		},

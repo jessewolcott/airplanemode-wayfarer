@@ -144,7 +144,8 @@ def points(correct, diff, elapsed, streak_after):
     base = BASE_POINTS.get(diff, 100)
     speed = 0
     if MIN_HUMAN <= elapsed < TIME_LIMIT:
-        speed = round(SPEED_MAX * (1 - elapsed / TIME_LIMIT))
+        # full SPEED_MAX at MIN_HUMAN (the fastest answer that counts), down to 0 at TIME_LIMIT
+        speed = round(SPEED_MAX * (TIME_LIMIT - elapsed) / (TIME_LIMIT - MIN_HUMAN))
     bonus = min(STREAK_CAP, STREAK_STEP * max(0, streak_after - 1))
     return {"base": base, "speed": speed, "streak": bonus, "total": base + speed + bonus}
 
@@ -245,6 +246,8 @@ class Round:
             "cat": q["cat"], "cat_name": self.bank.cat_names.get(q["cat"], q["cat"]), "diff": q["diff"],
             "timed": self.timed, "limit": TIME_LIMIT,
             "remaining": max(0.0, TIME_LIMIT - elapsed) if self.timed else None,
+            # right/wrong of the questions already answered: lets a reloaded page redraw its dots
+            "results": [a["correct"] for a in self.answers[-ROUND_LENGTH:]] if self.mode != "endless" else [],
             **self.status(),
         }
 
@@ -322,8 +325,10 @@ def board_label(board, bank):
 def share_text(rnd, right, n):
     marks = "".join("🟩" if a["correct"] else "🟥" for a in rnd.answers[:ROUND_LENGTH if rnd.mode != "endless" else 50])
     head = f"Wayfarer · {rnd.label}"
-    if rnd.mode == "endless":
+    if rnd.mode == "endless" and rnd.strikes >= ENDLESS_STRIKES:
         line = f"{right} right before three strikes · {rnd.score} pts · best streak {rnd.best_streak}"
+    elif rnd.mode == "endless":   # stopped at ENDLESS_MAX (or still going)
+        line = f"{right}/{n} right · {rnd.score} pts · best streak {rnd.best_streak}"
     else:
         line = f"{right}/{n} · {rnd.score} pts · best streak {rnd.best_streak}"
     return f"{head}\n{line}\n{marks}"
@@ -350,6 +355,7 @@ class Rounds:
         if rnd is None:
             raise RoundError(404, "That round has expired. Start a new one.")
         self.items.move_to_end(rid)
+        rnd.touched = now      # any call keeps it alive (the end screen's summary and submit too)
         return rnd
 
     def prune(self, now):

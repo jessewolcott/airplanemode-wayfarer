@@ -5,10 +5,13 @@ description: Travel trivia from Wikivoyage. Quick rounds, a daily flight for eve
 image: ghcr.io/jessewolcott/airplanemode-wayfarer
 port: 8000
 path: /wayfarer/
-memory: 64m           # the question bank (~1.4 MB of JSON) lives in memory; rounds are small
+memory: 64m           # the question bank (~1.4 MB of JSON, 0.31 MB gzipped) lives in memory; rounds are small
 volume: /data         # the leaderboard (scores.json): optional, without it scores last until a restart
 needs:
   llm: none
 env:
   DATA_DIR: Where the leaderboard is kept (default /data; empty = in memory only).
   TZ: The box's time zone, for when the daily flight changes (default UTC).
+  BANK_PATH: The question bank (default bank/questions.json.gz, shipped in the image).
+  ROUND_TTL: Seconds a round may sit idle before it's forgotten (default 10800, 3 h).
+  MAX_ROUNDS: Rounds kept in memory at once, least recently used dropped first (default 500).
