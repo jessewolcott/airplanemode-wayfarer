@@ -55,4 +55,4 @@ or the VS Code task "Bank: regenerate from the guide's ZIM". In Git Bash set `MS
 ## Releasing
 
 Push a `vX.Y.Z` tag. CI tests, then publishes `ghcr.io/jessewolcott/airplanemode-wayfarer:X.Y.Z`
-(arm64 + amd64). **Ask Jesse before pushing a release tag.** Released: 0.1.0 (pinned in the platform's `compose.yaml`).
+(arm64 + amd64). **Ask Jesse before pushing a release tag.** Released: 0.1.0, 0.2.0 (resume, speed bonus to 50, idle-timer fixes) (pinned in the platform's `compose.yaml`).
