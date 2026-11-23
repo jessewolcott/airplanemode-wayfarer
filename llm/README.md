@@ -1,6 +1,6 @@
 # Wayfarer: how it's built (LLM / engineer reference)
 
-Checked-in notes, written from the code (release 0.1.0 plus the fixes after it, 2026-11-22).
+Checked-in notes, written from the code (release 0.2.1, 2026-11-22).
 `.dockerignore` lists `llm`, so none of this reaches the image. If the code and these notes
 disagree, the code wins; fix the notes.
 

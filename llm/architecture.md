@@ -50,7 +50,7 @@ page uses only relative URLs.
 ## How it sits in the platform
 
 From `../airplanemode` (checked against the platform repo, not this one):
-- `compose.yaml`: service `wayfarer`, image `ghcr.io/jessewolcott/airplanemode-wayfarer:0.1.0`,
+- `compose.yaml`: service `wayfarer`, image `ghcr.io/jessewolcott/airplanemode-wayfarer:0.2.1`,
   `DATA_DIR=/data`, `TZ=${TZ:-UTC}`, volume `wayfarer-data:/data`,
   `mem_limit: ${WAYFARER_MEM:-64m}`, `restart: unless-stopped`. No `profiles`, so it runs on
   every hardware profile including GL.iNet lite.

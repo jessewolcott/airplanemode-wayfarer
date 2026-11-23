@@ -29,6 +29,7 @@ sharing a group key) for exact picking tests.
 | `test_points` | Exact point values incl. the 0 s, `MIN_HUMAN` (50), just under 20 s (0), monotonic speed, slow and streak cases |
 | `test_round_scoring_and_streaks` | 9/10 right with a miss at 5: best streak 5, score sums |
 | `test_health_meta_and_page` | `/health`, `/api/meta`, relative-URL rules on the page, icon served |
+| `test_page_has_the_airplanemode_home_button` | Exactly one `a.am-home` (`href="../"`, `aria-label="AirplaneMode home"`) and it sits in the `.top` bar; no `a.brand` link any more, the logo is `#brandBtn` (this app's start screen) |
 | `test_questions_go_out_without_answers` | No answer keys in `next`; re-serve keeps order and clock |
 | `test_resume_after_a_reload` | Re-asking `next` after an answer: same question and options, clock not restarted, `results` [True], no answer keys; endless sends `results: []` |
 | `test_answer_validation` | 409 before serving / wrong n / twice; 400 bad choice; 422 non-int; 404 unknown round; 400 bad mode/cat/region |
@@ -95,4 +96,5 @@ setup-python@v7, setup-qemu@v4, setup-buildx@v4, login@v4, metadata@v6, build-pu
    CLAUDE.md files.
 
 Released: 0.1.0 (tag `v0.1.0`; commits "Wayfarer 0.1.0", "Fix sideways scroll on desktop",
-"Add screenshots and mark 0.1.0 as released"). Pinned in the platform's `compose.yaml`.
+"Add screenshots and mark 0.1.0 as released"), 0.2.0 (resume, speed bonus to 50, idle-timer
+fixes), 0.2.1 (home button). 0.2.1 is pinned in the platform's `compose.yaml`.
