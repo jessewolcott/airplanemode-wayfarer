@@ -36,6 +36,14 @@ turns off animations.
 
 ## Screens
 
+**Top bar** (on every screen): the logo (`button.brand#brandBtn`, "Wayfarer / Travel trivia")
+goes to this app's start screen: mid-round it clicks `#quit` (so the same `confirm`), otherwise
+`home()`; it no longer links out of the app. At the right: Leaderboards, About, then the
+AirplaneMode home button `a.am-home` (house icon, `href="../"`, 44 x 44, platform app contract
+item 10). The home button never asks: a round in progress is in `sessionStorage`, so coming
+back in the same tab resumes it (a timed question's clock keeps running meanwhile; rounds idle
+over `ROUND_TTL`, 3 h, expire -> toast and home).
+
 **Boot**: `findGuide()` (not awaited) and `GET api/meta` -> resume the saved round (above)
 or `home()`. If meta fails:
 "Couldn't reach the game on this box. Pull down to retry."
@@ -106,6 +114,8 @@ has, but article paths come from the bank's snapshot: an article renamed since 2
 `test_health_meta_and_page`: contains `"api/rounds`, never `"/api/` or `` `/api/ ``, and no
 `src=` or `<link href=` that starts with `http:`, `https:`, `//` or `/x`. Plain `<a href>` to
 the CC licence is allowed. `/static/icon.svg` must serve 200.
+`test_page_has_the_airplanemode_home_button`: exactly one `<a class="am-home"` with
+`href="../"` and `aria-label="AirplaneMode home"`, inside `<div class="top">`; no `<a class="brand"`.
 
 ## Not verified
 

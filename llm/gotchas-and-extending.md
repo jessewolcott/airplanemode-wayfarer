@@ -40,7 +40,9 @@ Bank:
 
 Page:
 - **Resume is per tab**: a reload picks the round up (`sessionStorage`), a new tab doesn't;
-  "Leave this round" abandons it. A reload during the verdict skips to the next question.
+  "Leave this round" (and the logo, mid-round) abandons it. Going to AirplaneMode with the
+  house button and back in the same tab resumes it. A reload during the verdict skips to the
+  next question.
 - The client timer fires `choose(null)` at its own 0; the server has 1.5 s grace on top.
 - On any non-404 answer error the page calls `next()`, re-serving the same question.
 - `markSeen` happens when a question is served, not answered.

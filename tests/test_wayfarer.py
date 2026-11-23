@@ -262,6 +262,18 @@ def test_health_meta_and_page():
     assert c.get("/static/icon.svg").status_code == 200
 
 
+def test_page_has_the_airplanemode_home_button():
+    # platform app contract item 10: the house link back to the menu, in the top bar; the
+    # logo no longer leaves the app (it goes to this app's start screen)
+    html = c.get("/").text
+    links = re.findall(r'<a class="am-home"[^>]*>', html)
+    assert len(links) == 1, links
+    assert 'href="../"' in links[0] and 'aria-label="AirplaneMode home"' in links[0]
+    top = re.split(r"</div>\s*</div>", html.split('<div class="top">', 1)[1], maxsplit=1)[0]
+    assert 'class="am-home"' in top
+    assert '<a class="brand"' not in html and 'id="brandBtn"' in top
+
+
 def test_questions_go_out_without_answers():
     rd = new_round()
     q = ok(c.post(f"/api/rounds/{rd['id']}/next"))

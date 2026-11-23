@@ -41,6 +41,10 @@
   .brand small { display: block; font: 600 .62rem/1.2 var(--mono); color: var(--dim); letter-spacing: .14em; text-transform: uppercase; margin-top: 3px; }
   .icon-btn { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: #ffffff0d; border: 1px solid var(--line); }
   .icon-btn svg { width: 22px; height: 22px; }
+  button.brand { text-align: left; }
+  /* AirplaneMode home button (platform app contract item 10): right end of the top bar */
+  .am-home { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex: none; background: #ffffff0d; border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+  .am-home:hover { border-color: #3a5684; color: var(--gold); }
 
   /* ---------- home ---------- */
   h2 { font: 700 .74rem/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); margin: 26px 2px 10px; display: flex; align-items: center; gap: 8px; }
@@ -234,13 +238,19 @@
 
 <div class="wrap">
   <div class="top">
-    <a class="brand" href="../" title="Back to AirplaneMode">
+    <button class="brand" id="brandBtn" type="button" title="Back to departures">
       <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="#f2b84b" stroke-width="3"/><circle cx="32" cy="32" r="23" fill="none" stroke="#f2b84b" stroke-width="1.6" stroke-dasharray="2 3"/><path d="M14 32h36M32 12c6 5.5 8.5 12.5 8.5 20S38 46.5 32 52c-6-5.5-8.5-12.5-8.5-20S26 17.5 32 12z" fill="none" stroke="#3cc4b4" stroke-width="2.4"/><path d="M45 17l-12 9-7-1-2 2 6 3-3 5h-3l-1 2 5 1 1 5 2-1v-3l5-3 3 6 2-2-1-7 9-12c1.5-2-.5-4-2-3z" fill="#f2b84b"/></svg>
       <div><b>Wayfarer</b><small>Travel trivia</small></div>
-    </a>
+    </button>
     <div style="display:flex;gap:8px">
       <button class="icon-btn" id="boardsBtn" title="Leaderboards" aria-label="Leaderboards"><svg><use href="#i-trophy"/></svg></button>
       <button class="icon-btn" id="aboutBtn" title="About Wayfarer" aria-label="About Wayfarer"><svg><use href="#i-info"/></svg></button>
+      <a class="am-home" href="../" aria-label="AirplaneMode home" title="AirplaneMode home">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>
+        </svg>
+      </a>
     </div>
   </div>
 
@@ -608,6 +618,10 @@ async function boards() {
 
 $("#aboutBtn").onclick = () => S.meta && about();
 $("#boardsBtn").onclick = () => S.meta && boards();
+// the logo goes to this app's start screen; mid-round it asks first, like "Leave this round".
+// (The house button leaves for AirplaneMode without asking: a round in progress lives in
+// sessionStorage, so coming back in the same tab resumes it.)
+$("#brandBtn").onclick = () => { if ($("#quit")) $("#quit").click(); else if (S.meta) home(); };
 document.addEventListener("keydown", e => {
   if (e.key === "Escape" && !$("#sheet").hidden) return closeSheet();
   if (!$("#sheet").hidden || e.target.matches("input, textarea")) return;
